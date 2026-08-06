@@ -1,4 +1,6 @@
 import * as XLSX from 'xlsx';
+import ExcelJS from 'exceljs';
+import { saveAs } from 'file-saver';
 import { SubjectRecord, DisabilityType, DisabilityLevel, AgeGroup } from '../types';
 
 export function parseExcelDate(val: any): string {
@@ -436,43 +438,126 @@ export function parseExcelFile(file: File): Promise<SubjectRecord[]> {
   });
 }
 
-export function exportToExcel(records: SubjectRecord[], filename: string) {
-  const mapRecord = (r: SubjectRecord, idx: number) => ({
-    'STT': idx + 1,
-    'Họ và tên': r.hoTen,
-    'Ngày tháng năm sinh': r.ngaySinhFormat || r.ngaySinh,
-    'Giới tính': r.gioiTinh,
-    'Thôn': r.thon,
-    'Dạng tật': r.dangTat,
-    'Mức độ khuyết tật': r.mucDo,
-    'Nhóm tuổi': r.nhomTuoi || '',
-    'Số CMND/CCCD': r.cmnd || '',
-    'Người đại diện': r.nguoiDaiDien || '',
-    'Mối quan hệ': r.moiQuanHe || '',
-    'SĐT người đại diện': r.sdtNguoiDaiDien || '',
-    'Ghi chú': r.ghiChu || ''
+export async function exportToExcel(records: SubjectRecord[], filename: string) {
+  const columnsDef = [
+    { header: 'STT', key: 'stt', align: 'center', minWidth: 8 },
+    { header: 'Họ và tên', key: 'hoTen', align: 'left', minWidth: 22 },
+    { header: 'Ngày tháng năm sinh', key: 'ngaySinh', align: 'center', minWidth: 18 },
+    { header: 'Giới tính', key: 'gioiTinh', align: 'center', minWidth: 12 },
+    { header: 'Thôn', key: 'thon', align: 'left', minWidth: 16 },
+    { header: 'Dạng tật', key: 'dangTat', align: 'left', minWidth: 22 },
+    { header: 'Mức độ khuyết tật', key: 'mucDo', align: 'center', minWidth: 20 },
+    { header: 'Nhóm tuổi', key: 'nhomTuoi', align: 'center', minWidth: 20 },
+    { header: 'Số CMND/CCCD', key: 'cmnd', align: 'center', minWidth: 18 },
+    { header: 'Người đại diện', key: 'nguoiDaiDien', align: 'left', minWidth: 22 },
+    { header: 'Mối quan hệ', key: 'moiQuanHe', align: 'center', minWidth: 16 },
+    { header: 'SĐT người đại diện', key: 'sdtNguoiDaiDien', align: 'center', minWidth: 18 },
+    { header: 'Ghi chú', key: 'ghiChu', align: 'left', minWidth: 32 }
+  ];
+
+  const mapRecordToRow = (r: SubjectRecord, idx: number) => ({
+    stt: idx + 1,
+    hoTen: r.hoTen || '',
+    ngaySinh: r.ngaySinhFormat || r.ngaySinh || '',
+    gioiTinh: r.gioiTinh || '',
+    thon: r.thon || '',
+    dangTat: r.dangTat || '',
+    mucDo: r.mucDo || '',
+    nhomTuoi: r.nhomTuoi || '',
+    cmnd: r.cmnd || '',
+    nguoiDaiDien: r.nguoiDaiDien || '',
+    moiQuanHe: r.moiQuanHe || '',
+    sdtNguoiDaiDien: r.sdtNguoiDaiDien || '',
+    ghiChu: r.ghiChu || ''
   });
 
-  const workbook = XLSX.utils.book_new();
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = 'Hội đồng xác định mức độ khuyết tật';
+  workbook.created = new Date();
+
+  const addSheetWithData = (sheetName: string, sheetRecords: SubjectRecord[]) => {
+    const sheet = workbook.addWorksheet(sheetName, {
+      views: [{ showGridLines: true }]
+    });
+
+    // Add Header row
+    const headerValues = columnsDef.map(c => c.header);
+    const headerRow = sheet.addRow(headerValues);
+    headerRow.height = 30;
+
+    // Style Header row
+    headerRow.eachCell((cell) => {
+      cell.font = { name: 'Times New Roman', size: 11, bold: true, color: { argb: 'FF000000' } };
+      cell.fill = {
+        type: 'pattern',
+        pattern: 'solid',
+        fgColor: { argb: 'FFEBF1F5' } // Soft professional light gray-blue background
+      };
+      cell.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
+      cell.border = {
+        top: { style: 'thin', color: { argb: 'FF000000' } },
+        left: { style: 'thin', color: { argb: 'FF000000' } },
+        bottom: { style: 'thin', color: { argb: 'FF000000' } },
+        right: { style: 'thin', color: { argb: 'FF000000' } }
+      };
+    });
+
+    // Add Data rows
+    sheetRecords.forEach((rec, idx) => {
+      const rowData = mapRecordToRow(rec, idx);
+      const rowValues = columnsDef.map(col => rowData[col.key as keyof typeof rowData]);
+      const dataRow = sheet.addRow(rowValues);
+      dataRow.height = 22;
+
+      dataRow.eachCell((cell, colNumber) => {
+        const colDef = columnsDef[colNumber - 1];
+        cell.font = { name: 'Times New Roman', size: 11 };
+        cell.alignment = {
+          vertical: 'middle',
+          horizontal: (colDef?.align as 'left' | 'center' | 'right') || 'left',
+          wrapText: true
+        };
+        cell.border = {
+          top: { style: 'thin', color: { argb: 'FF000000' } },
+          left: { style: 'thin', color: { argb: 'FF000000' } },
+          bottom: { style: 'thin', color: { argb: 'FF000000' } },
+          right: { style: 'thin', color: { argb: 'FF000000' } }
+        };
+      });
+    });
+
+    // Set auto column widths with padding
+    columnsDef.forEach((colDef, colIdx) => {
+      let maxLen = colDef.header.length;
+      sheetRecords.forEach((rec, recIdx) => {
+        const rowData = mapRecordToRow(rec, recIdx);
+        const valStr = String(rowData[colDef.key as keyof typeof rowData] || '');
+        if (valStr.length > maxLen) {
+          maxLen = valStr.length;
+        }
+      });
+
+      // Calculate width + padding
+      const calcWidth = Math.max(colDef.minWidth, Math.min(maxLen + 4, 50));
+      sheet.getColumn(colIdx + 1).width = calcWidth;
+    });
+  };
 
   const over6 = records.filter(r => r.nhomTuoi === 'Từ 6 tuổi trở lên');
   const under6 = records.filter(r => r.nhomTuoi === 'Dưới 6 tuổi');
 
   if (over6.length > 0 && under6.length > 0) {
-    const wsOver6 = XLSX.utils.json_to_sheet(over6.map(mapRecord));
-    XLSX.utils.book_append_sheet(workbook, wsOver6, 'Trên 6 tuổi');
-    const wsUnder6 = XLSX.utils.json_to_sheet(under6.map(mapRecord));
-    XLSX.utils.book_append_sheet(workbook, wsUnder6, 'Dưới 6 tuổi');
+    addSheetWithData('Trên 6 tuổi', over6);
+    addSheetWithData('Dưới 6 tuổi', under6);
   } else if (under6.length > 0 && over6.length === 0) {
-    const wsUnder6 = XLSX.utils.json_to_sheet(under6.map(mapRecord));
-    XLSX.utils.book_append_sheet(workbook, wsUnder6, 'Dưới 6 tuổi');
+    addSheetWithData('Dưới 6 tuổi', under6);
   } else if (over6.length > 0 && under6.length === 0) {
-    const wsOver6 = XLSX.utils.json_to_sheet(over6.map(mapRecord));
-    XLSX.utils.book_append_sheet(workbook, wsOver6, 'Trên 6 tuổi');
+    addSheetWithData('Trên 6 tuổi', over6);
   } else {
-    const wsAll = XLSX.utils.json_to_sheet(records.map(mapRecord));
-    XLSX.utils.book_append_sheet(workbook, wsAll, 'Danh_sach_doi_tuong');
+    addSheetWithData('Danh_sach_doi_tuong', records);
   }
 
-  XLSX.writeFile(workbook, filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`);
+  const buffer = await workbook.xlsx.writeBuffer();
+  const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  saveAs(blob, filename.endsWith('.xlsx') ? filename : `${filename}.xlsx`);
 }
