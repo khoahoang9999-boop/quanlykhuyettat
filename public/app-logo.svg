@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b91c1c"/>
+      <stop offset="50%" stop-color="#991b1b"/>
+      <stop offset="100%" stop-color="#7f1d1d"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a"/>
+      <stop offset="50%" stop-color="#f59e0b"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Outer Ring -->
+  <circle cx="100" cy="100" r="94" fill="url(#bgGrad)" stroke="url(#goldGrad)" stroke-width="6" filter="url(#shadow)"/>
+  <circle cx="100" cy="100" r="86" fill="none" stroke="#fef08a" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.6"/>
+
+  <!-- Golden Wreath / Rice Sheaves -->
+  <g fill="url(#goldGrad)" opacity="0.9">
+    <path d="M 35 125 C 28 95, 45 60, 70 45 C 65 60, 55 85, 52 110 Z" />
+    <path d="M 165 125 C 172 95, 155 60, 130 45 C 135 60, 145 85, 148 110 Z" />
+  </g>
+
+  <!-- Central Star of Vietnam -->
+  <polygon points="100,32 107,52 129,52 111,65 118,86 100,73 82,86 89,65 71,52 93,52" fill="url(#goldGrad)" filter="url(#shadow)"/>
+
+  <!-- Supportive Caring Hands & Figure Symbol -->
+  <g transform="translate(100, 125)" filter="url(#shadow)">
+    <!-- Person / Disability Care Silhouette -->
+    <circle cx="0" cy="-28" r="9" fill="url(#goldGrad)"/>
+    <path d="M -14,-15 C -14,-22 14,-22 14,-15 C 14,-6 8,4 0,10 C -8,4 -14,-6 -14,-15 Z" fill="url(#goldGrad)"/>
+
+    <!-- Left Hand -->
+    <path d="M -40,12 C -30,2 -15,-2 -5,4 C -12,12 -25,20 -38,18 Z" fill="#ffffff" opacity="0.95"/>
+    <!-- Right Hand -->
+    <path d="M 40,12 C 30,2 15,-2 5,4 C 12,12 25,20 38,18 Z" fill="#ffffff" opacity="0.95"/>
+  </g>
+
+  <!-- Base Banner Ribbon -->
+  <path d="M 40 162 L 70 156 L 100 160 L 130 156 L 160 162 L 152 178 L 100 174 L 48 178 Z" fill="url(#goldGrad)"/>
+  <text x="100" y="170" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#7f1d1d" text-anchor="middle" letter-spacing="1">UBND XÃ</text>
+</svg>

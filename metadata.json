@@ -1,0 +1,8 @@
+{
+  "name": "Remix Xác Định Mức Độ Khuyết Tật",
+  "description": "Ứng dụng Streamlit xử lý và tự động hóa hồ sơ Xác Định Mức Độ Khuyết Tật theo Nghị định 30/2020/NĐ-CP.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
