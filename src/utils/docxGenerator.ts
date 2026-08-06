@@ -471,14 +471,16 @@ export function buildPhieuChildren(subject: SubjectRecord, config: AdminConfig) 
         })
       ]
     }),
-    ...(!isUnder6 && subject.cmnd ? [
-      new Paragraph({
-        spacing: { after: 50 },
-        children: [
-          new TextRun({ text: `- Số CMND hoặc căn cước công dân (nếu có): ${subject.cmnd}`, font: FONT_FAMILY, size: 26 })
-        ]
-      })
-    ] : []),
+    new Paragraph({
+      spacing: { after: 50 },
+      children: [
+        new TextRun({
+          text: `- Số CMND hoặc căn cước công dân (nếu có): ${subject.cmnd || '................................................'}`,
+          font: FONT_FAMILY,
+          size: 26
+        })
+      ]
+    }),
     new Paragraph({
       spacing: { after: 50 },
       children: [
@@ -928,7 +930,7 @@ export function buildPhieuChildren(subject: SubjectRecord, config: AdminConfig) 
       const isNoDisability = subject.mucDo === 'Không khuyết tật' || subject.dangTat === 'Không khuyết tật';
       const dtText = isUndet ? 'Không xác định' : (isNoDisability ? 'Không khuyết tật' : (subject.dangTat || '.....................................................'));
       const mdText = isUndet ? 'Không xác định' : (isNoDisability ? 'Không khuyết tật' : (subject.mucDo || '.....................................................'));
-      const gcText = isUndet ? (subject.ghiChu || 'Chưa đủ điều kiện kết luận về dạng tật và mức độ khuyết tật.') : (subject.ghiChu || '.....................................................');
+      const gcText = isUndet ? (subject.ghiChu || 'Chưa đủ điều kiện kết luận về dạng tật và mức độ khuyết tật.') : '.....................................................';
 
       return [
         new Paragraph({
